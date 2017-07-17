@@ -8,5 +8,10 @@ namespace NettleIO.Core
         {
             return System.Activator.CreateInstance(type);
         }
+
+        public T Create<T>()
+        {
+            return System.Activator.CreateInstance<T>();
+        }
     }
 }

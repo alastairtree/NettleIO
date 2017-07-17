@@ -68,6 +68,10 @@ namespace NettleIO.Core
                 Func<IStage, Task<IValueResult<object>>> stageFunc = s => s.Execute(value);
                 IValueResult<object> stageResult = await stageFunc((IStage)stage);
                 value = stageResult.Value;
+
+
+                //ffs just do this?!
+                // value = ((IStage) stage).Execute(value);
             }
 
             //for (int i = 0; i < stagesTypes.Count; i++)

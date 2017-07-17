@@ -33,7 +33,7 @@ namespace NettleIO.Core
             return new Result<TValue> {Succeeded = false, Error = ex, Message = message};
         }
 
-        public new static Result<TValue> Success(string message = "")
+        public static Result<TValue> Success(string message = "")
         {
             return new Result<TValue> {Message = message};
         }
