@@ -2,8 +2,8 @@
 
 namespace NettleIO.Core
 {
-    public interface ISource
+    public interface ISource<TResult>
     {
-        Task<IValueResult<object>> RecieveAsync();
+        Task<IValueResult<TResult>> RecieveAsync();
     }
 }

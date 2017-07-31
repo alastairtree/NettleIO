@@ -12,17 +12,10 @@ namespace NettleIO.Core.Tests
         {
             IPipeline pipeline = new Pipeline(new Activator());
             pipeline
-                .RegisterSource<MySource>()
+                .AddSource<MySource,MyEntity>()
                 .AddStage<CapitaliseNameStage, MyEntity>()
                 .AddStage<MapToAnotherStage,MyEntity,AnotherEntity>()
                 .RegisterDestination<MyDestination, AnotherEntity>();
-
-            // TODO: Can we use some nicer lambda stuff to use expressions rather than passing object around
-            //    .AddStage<CapitaliseNameStage,MyEntity,MyEntity>((stage, entity) => stage.Execute(entity))
-            // or pipeline.AddStage((CapitaliseNameStage stage, MyEntity entity) => stage.Execute(entity));
-            //    .AddStage((MapToAnotherStage stage, MyEntity source) => stage.Execute(source))
-            //    .RegisterDestination<MyDestination, AnotherEntity>();
-
 
             await pipeline.Execute();
         }
@@ -82,7 +75,7 @@ namespace NettleIO.Core.Tests
             {
                 results.Add(item);
                 Console.WriteLine($"Recieved item with ID {item.Id} and name {item.FullName}");
-                return await SuccessAsync("woop");
+                return await Result.SuccessAsync("woop");
             }
         }
     }

@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Linq;
 using System.Linq.Expressions;
+using NettleIO.Core.Tests;
 using Xunit;
 
-namespace NettleIO.Core.Tests
+namespace NettleIO.Core.IgnoreTheseTests
 {
     public class ExpressionHackery
     {

@@ -10,14 +10,9 @@ namespace NettleIO.Core
 
         public abstract Task<IValueResult<TDataOut>> Execute(TDataIn input);
 
-        protected virtual IValueResult<TDataOut> Success(string message = "")
-        {
-            return Result.Success<TDataOut>(message);
-        }
-
         protected virtual IValueResult<TDataOut> Success(TDataOut result)
         {
-            return Result<TDataOut>.SuccessWithValue(result);
+            return Result.SuccessWithValue(result);
         }
 
         protected virtual IValueResult<TDataOut> Failure(Task<TDataOut> failedTask)
@@ -36,22 +31,22 @@ namespace NettleIO.Core
 
         protected virtual IValueResult<TDataOut> Failure(string message = "")
         {
-            return Result<TDataOut>.Fail(message);
+            return Result.Fail<TDataOut>(message);
         }
 
         protected virtual IValueResult<TDataOut> Failure(Exception exception)
         {
-            return Result<TDataOut>.Fail(exception);
+            return Result.Fail<TDataOut>(exception);
         }
 
         protected virtual Task<IValueResult<TDataOut>> SuccessAsync(TDataOut value, string message = "")
         {
-            return Task.FromResult((IValueResult<TDataOut>)Result.SuccessWithValue(value, message));
+            return Result.SuccessWithValueAsync(value, message);
         }
 
         protected virtual Task<IValueResult<TDataOut>> FailureAsync(Exception exception, string message = "")
         {
-            return Task.FromResult((IValueResult<TDataOut>)Result.Fail(exception, message));
+            return Result.FailAsync<TDataOut>(exception, message);
         }
 
         //TODO: try and remove the need for objects! can we use expressions lamdas and generics to make this more friendly?!

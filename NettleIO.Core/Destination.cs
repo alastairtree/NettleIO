@@ -20,12 +20,12 @@ namespace NettleIO.Core
         //TODO: look at the duplication of sucess and failure methods between Source.cs and Stage.cs
         public virtual Task<IActionResult> SuccessAsync(string message = "")
         {
-            return Task.FromResult((IActionResult)Result.Success(message));
+            return Result.SuccessAsync(message);
         }
 
         public virtual Task<IActionResult> FailureAsync(Exception exception, string message = "")
         {
-            return Task.FromResult((IActionResult)Result.Fail(exception, message));
+            return Task.FromResult(Result.Fail(exception, message));
         }
     }
 }

@@ -1,40 +1,34 @@
 using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace NettleIO.Core
 {
     public class Pipeline : IPipeline
     {
-        private readonly IActivator activator;
+        private IActivator activator;
+
+        private readonly List<IStagePerformer> performers = new List<IStagePerformer>();
+
+        public Pipeline() : this(new Activator())
+        {
+        }
 
         public Pipeline(IActivator activator)
         {
             this.activator = activator;
         }
 
-        private Type sourceType;
-        private List<Type> stagesTypes = new List<Type>();
-        private List<Expression> expressions = new List<Expression>();
-        private Type destinationType;
-
-        public IPipeline RegisterSource<TSource>() where TSource : ISource
+        public IPipeline AddSource<TSource, TDataOut>() where TSource : ISource<TDataOut>
         {
-            this.sourceType = typeof(TSource);
-            return this;    
+            performers.Add(StagePerformer<TSource, TDataOut>.Build(stage => stage.RecieveAsync()));
+            return this;
         }
 
         public IPipeline AddStage<TStage, TDataIn, TDataOut>() where TStage : IStage<TDataIn, TDataOut>
         {
-            stagesTypes.Add(typeof(TStage));
+            performers.Add(StagePerformer<TStage, TDataOut>.Build<TDataIn>((stage, input) => stage.Execute(input)));
             return this;
-        }
-
-        public IPipeline AddStage<TStage, TDataIn, TDataOut>(Expression<Func<TStage, TDataIn, Task<IValueResult<TDataOut>>>> executeExpression) where TStage : IStage<TDataIn, TDataOut>
-        {
-            expressions.Add(executeExpression);
-            return AddStage<TStage, TDataIn, TDataOut>(); ;
         }
 
         public IPipeline AddStage<TStage, TData>() where TStage : IStage<TData>
@@ -44,74 +38,51 @@ namespace NettleIO.Core
 
         public IPipeline RegisterDestination<TDestination, TData>() where TDestination : IDestination<TData>
         {
-            destinationType = typeof(TDestination);
+            performers.Add(StagePerformer<TDestination>.Build<TData>((stage, input) => stage.SendAsync(input)));
             return this;
         }
 
-        public async Task Execute()
+        public async Task<PipelineExecutionReport> Execute()
         {
             Validate();
 
-            var source = activator.Create(sourceType);
-
-            Func<ISource, Task<IValueResult<object>>> recieve = s => s.RecieveAsync();
-
-            IValueResult<object> recieved = await recieve(source as ISource);
-            object value = recieved.Value;
-            
-            if(value == null)
-                throw new Exception("Empty source!");
-
-            foreach (var stagesType in stagesTypes)
+            var results = new List<IActionResult>();
+            object value = null;
+            foreach (var performer in performers)
             {
-                var stage = activator.Create(stagesType);
-                Func<IStage, Task<IValueResult<object>>> stageFunc = s => s.Execute(value);
-                IValueResult<object> stageResult = await stageFunc((IStage)stage);
-                value = stageResult.Value;
-
-
-                //ffs just do this?!
-                // value = ((IStage) stage).Execute(value);
+                performer.PrepareToPerform(activator);
+                if (value != null)
+                {
+                    await performer.Perform(value);
+                }
+                else
+                {
+                    await performer.Perform();
+                }
+                results.Add(performer
+                    .Result); //TODO: We dont need all the result Value data, just the metadata. clone to another object?
+                value = performer.Value;
             }
 
-            //for (int i = 0; i < stagesTypes.Count; i++)
-            //{
-            //    var stage = (IStage)activator.Create(stagesTypes[i]);
-            //    var expression = expressions[i];
-            //    var lambda =  Expression.Lambda<Func<IStage, object, Task<IValueResult<object>>>>(
-            //        expression);
-
-            //    value = lambda.Compile()(stage, value);
-            //}
-
-            var destination = (IDestination) activator.Create(destinationType);
-
-            Func<IDestination, Task<IActionResult>> send = s => s.SendAsync(value);
-
-            var completed = await send(destination);
-
             Console.WriteLine("Completed!");
+
+            return new PipelineExecutionReport(results);
         }
 
-        //TODO: Build expressions for the pipeline?!
-
-        //private static Func<object> CreateLambdaMethodCall(Type type, string methodName)
-        //{
-        //    var itemExpressionVariable = Expression.Variable(type);
-        //    var method = type.GetRuntimeMethod()
-
-        //    var propertyExpression = Expression.Property(itemExpressionVariable, fieldName);
-
-        //    Expression propertyExpressionToObject = Expression.Convert(propertyExpression, typeof(object));
-        //    var getter =
-        //        Expression.Lambda<Func<T, object>>(propertyExpressionToObject, itemExpressionVariable).Compile();
-
-        //    return getter;
-        //}
+        public void SetActivator(IActivator activator)
+        {
+            this.activator = activator ?? throw new ArgumentNullException(nameof(activator));
+        }
 
         protected virtual void Validate()
         {
             Console.WriteLine("Doing some validation....?");
+        }
+
+        public void AddStage(IStagePerformer stagePerformer)
+        {
+            if (stagePerformer == null) throw new ArgumentNullException(nameof(stagePerformer));
+            performers.Add(stagePerformer);
         }
     }
 }

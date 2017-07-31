@@ -1,10 +1,12 @@
 using System;
+using System.Net.Http.Headers;
+using System.Threading.Tasks;
 
 namespace NettleIO.Core
 {
     public class Result<TValue> : Result, IValueResult<TValue>
     {
-        protected Result()
+        internal Result()
         {
         }
 
@@ -20,28 +22,6 @@ namespace NettleIO.Core
         public virtual bool IsEmpty => Value == null;
         public virtual bool HasValue => Value != null;
         public virtual TValue Value { get; }
-
-        public new static Result<TValue> Fail(string message = "")
-        {
-            return new Result<TValue> {Succeeded = false, Message = message};
-        }
-
-        public new static Result<TValue> Fail(Exception ex, string message = "")
-        {
-            if (ex == null) throw new ArgumentNullException(nameof(ex));
-
-            return new Result<TValue> {Succeeded = false, Error = ex, Message = message};
-        }
-
-        public static Result<TValue> Success(string message = "")
-        {
-            return new Result<TValue> {Message = message};
-        }
-
-        public static Result<TValue> SuccessWithValue(TValue value, string message = "")
-        {
-            return new Result<TValue>(value) {Succeeded = true, Message = message};
-        }
     }
 
     public class Result : IActionResult
@@ -52,8 +32,6 @@ namespace NettleIO.Core
 
         protected Result(string message)
         {
-            if (string.IsNullOrEmpty(message)) throw new ArgumentNullException(nameof(message));
-
             Message = message;
         }
 
@@ -65,31 +43,72 @@ namespace NettleIO.Core
         public virtual IActionMetric Metrics { get; protected set; }
         public virtual string Message { get; protected set; }
 
-        public static Result Fail(string message = "")
+        public static IActionResult Fail(string message = "")
         {
             return new Result(message) {Succeeded = false};
         }
 
-        public static Result Success(object value, string message = "")
+        public static IValueResult<TValue> Fail<TValue>(string message = "")
         {
-            return new Result {Succeeded = true};
+            return new Result<TValue> { Message = message, Succeeded = false };
         }
 
-        public static Result Fail(Exception ex, string message = "")
+        public static Task<IActionResult> FailAsync(string message = "")
         {
-            if (ex == null) throw new ArgumentNullException(nameof(ex));
-
-            return new Result(message) {Succeeded = false, Error = ex};
+            return Task.FromResult(Fail(message));
         }
 
-        public static Result<TValue> SuccessWithValue<TValue>(TValue value, string message = "")
+        public static Task<IValueResult<TValue>> FailAsync<TValue>(string message = "")
         {
-            return Result<TValue>.SuccessWithValue(value, message);
+            return Task.FromResult(Fail<TValue>(message));
         }
 
-        public static Result<TValue> Success<TValue>(string message = "")
+
+        public static IActionResult Fail(Exception exception, string message = "")
         {
-            return Result<TValue>.Success(message);
+            if (exception == null) throw new ArgumentNullException(nameof(exception));
+
+            return new Result(message) {Succeeded = false, Error = exception};
+        }
+
+        public static Task<IActionResult> FailAsync(Exception exception, string message = "")
+        {
+            return Task.FromResult(Fail(exception, message));
+        }
+
+
+        public static IValueResult<TValue> Fail<TValue>(Exception exception, string message = "")
+        {
+            if (exception == null) throw new ArgumentNullException(nameof(exception));
+
+            return new Result<TValue> { Succeeded = false, Error = exception, Message = message};
+        }
+
+        public static Task<IValueResult<TValue>> FailAsync<TValue>(Exception exception, string message = "")
+        {
+            return Task.FromResult(Fail<TValue>(exception, message));
+        }
+
+
+        public static IValueResult<TValue> SuccessWithValue<TValue>(TValue value, string message = "")
+        {
+            return new Result<TValue>(value) { Succeeded = true, Message = message };
+        }
+
+        public static Task<IValueResult<TValue>> SuccessWithValueAsync<TValue>(TValue value, string message = "")
+        {
+            
+            return Task.FromResult(SuccessWithValue(value, message));
+        }
+
+        public static IActionResult Success(string message = "")
+        {
+            return new Result(message){ Succeeded=true };
+        }
+
+        public static Task<IActionResult> SuccessAsync(string message = "")
+        {
+            return Task.FromResult(Success(message));
         }
 
         public override string ToString()

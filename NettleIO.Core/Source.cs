@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace NettleIO.Core
 {
-    public abstract class Source<TData> : ISource
+    public abstract class Source<TData> : ISource<TData>
     { 
         public abstract Task<IValueResult<TData>> RecieveAsync();
 
@@ -11,17 +11,12 @@ namespace NettleIO.Core
 
         public virtual Task<IValueResult<TData>> SuccessAsync(TData value, string message = "")
         {
-            return Task.FromResult((IValueResult<TData>) Result.SuccessWithValue(value, message));
+            return Task.FromResult(Result.SuccessWithValue(value, message));
         }
 
         public virtual Task<IValueResult<TData>> FailureAsync(Exception exception, string message = "")
         {
-            return Task.FromResult((IValueResult<TData>)Result.Fail(exception, message));
-        }
-
-        async Task<IValueResult<object>> ISource.RecieveAsync()
-        {
-            return (IValueResult<object>) await RecieveAsync();
+            return Task.FromResult(Result.Fail<TData>(exception, message));
         }
     }
 }
