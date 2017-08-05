@@ -5,9 +5,9 @@ namespace NettleIO.Core
 {
     public class PipelineExecutionReport
     {
-        private readonly List<IActionResult> results;
+        private readonly List<IStageResult> results;
 
-        public PipelineExecutionReport(List<IActionResult> results)
+        public PipelineExecutionReport(List<IStageResult> results)
         {
             this.results = results;
         }

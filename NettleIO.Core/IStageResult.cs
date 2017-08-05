@@ -2,7 +2,7 @@ using System;
 
 namespace NettleIO.Core
 {
-    public interface IActionResult
+    public interface IStageResult
     {
         bool Succeeded { get; }
 

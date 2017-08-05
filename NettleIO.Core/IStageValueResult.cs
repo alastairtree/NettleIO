@@ -1,6 +1,6 @@
 ﻿namespace NettleIO.Core
 {
-    public interface IValueResult<out TValue> : IActionResult
+    public interface IStageValueResult<out TValue> : IStageResult
     {
         TValue Value { get; }
     }

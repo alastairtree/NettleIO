@@ -2,12 +2,18 @@
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.Tasks;
+using NettleIO.Core.Exceptions;
 
 namespace NettleIO.Core
 {
-    internal class StagePerformer<TStage> : IStagePerformer
+    public class StagePerformer<TStage> : IStagePerformer<TStage>
     {
-        protected LambdaExpression StageExecutionExpression;
+        public StagePerformer(LambdaExpression stageExecutionExpression)
+        {
+            this.stageExecutionExpression = stageExecutionExpression ?? throw new ArgumentNullException(nameof(stageExecutionExpression));
+        }
+
+        private readonly LambdaExpression stageExecutionExpression;
 
         public TStage StageInstance { get; private set; }
 
@@ -15,17 +21,17 @@ namespace NettleIO.Core
         {
             get
             {
-                var callExpression = StageExecutionExpression.Body as MethodCallExpression;
+                var callExpression = stageExecutionExpression.Body as MethodCallExpression;
                 if (callExpression == null)
                     throw new ArgumentException("Expression body should be of type `MethodCallExpression`",
-                        nameof(StageExecutionExpression));
+                        nameof(stageExecutionExpression));
                 return callExpression;
             }
         }
 
         protected MethodInfo Method => MethodCallExpression.Method;
 
-        public IActionResult Result { get; protected set; }
+        public IStageResult Result { get; protected set; }
         public object Value { get; protected set; }
 
         public virtual void PrepareToPerform(IActivator activator)
@@ -41,69 +47,45 @@ namespace NettleIO.Core
 
         public virtual async Task Perform(params object[] arguments)
         {
-            var task = Method.Invoke(StageInstance, arguments) as Task<IActionResult>;
+            var task = Method.Invoke(StageInstance, arguments);
 
-            if (task == null)
+            if(task is null)
+                throw new StageReturnsTheWrongTypeException(Method, null);
+
+
+            if (!(task is Task<IStageResult>))
             {
-                Result = Core.Result.Fail(
-                    $"Invoking {Method} returned null or unmatching type. Expected {typeof(Task<IActionResult>)}");
-                return;
+                throw new StageReturnsTheWrongTypeException(Method, task.GetType());
             }
 
-            Result = await task;
-        }
-
-        public static StagePerformer<TStage> Build(
-            Expression<Func<TStage, Task<IActionResult>>> stageExecutionExpression)
-        {
-            if (stageExecutionExpression == null) throw new ArgumentNullException(nameof(stageExecutionExpression));
-
-            return new StagePerformer<TStage> {StageExecutionExpression = stageExecutionExpression};
-        }
-
-        public static StagePerformer<TStage> Build<TInput>(
-            Expression<Func<TStage, TInput, Task<IActionResult>>> stageExecutionExpression)
-        {
-            if (stageExecutionExpression == null) throw new ArgumentNullException(nameof(stageExecutionExpression));
-
-            return new StagePerformer<TStage> {StageExecutionExpression = stageExecutionExpression};
+            Result = await (task as Task<IStageResult>);
         }
     }
 
     internal class StagePerformer<TStage, TResult> : StagePerformer<TStage>
     {
-        public static StagePerformer<TStage, TResult> Build(
-            Expression<Func<TStage, Task<IValueResult<TResult>>>> stageExecutionExpression)
+        public StagePerformer(LambdaExpression stageExecutionExpression) : base(stageExecutionExpression)
         {
-            if (stageExecutionExpression == null) throw new ArgumentNullException(nameof(stageExecutionExpression));
-
-            return new StagePerformer<TStage, TResult> {StageExecutionExpression = stageExecutionExpression};
-        }
-
-        public static StagePerformer<TStage, TResult> Build<TInput>(
-            Expression<Func<TStage, TInput, Task<IValueResult<TResult>>>> stageExecutionExpression)
-        {
-            if (stageExecutionExpression == null) throw new ArgumentNullException(nameof(stageExecutionExpression));
-
-            return new StagePerformer<TStage, TResult> {StageExecutionExpression = stageExecutionExpression};
         }
 
         public override async Task Perform(params object[] arguments)
         {
-            var task = Method.Invoke(StageInstance, arguments) as Task<IValueResult<TResult>>;
+            var task = Method.Invoke(StageInstance, arguments);
 
-            if (task == null)
+            if (task is null)
+                throw new StageReturnsTheWrongTypeException(Method, null);
+
+
+            if (!(task is Task<IStageValueResult<TResult>>))
             {
-                Result = Core.Result.Fail(
-                    $"Invoking {Method} returned null or unmatching type. Expected {typeof(Task<IValueResult<TResult>>)}");
-                return;
+                throw new StageReturnsTheWrongTypeException(Method, task.GetType());
             }
 
-            Result = await task;
-
-            var result = Result as IValueResult<TResult>;
+            var result = await (task as Task<IStageValueResult<TResult>>);
+            Result = result;
             if (result != null)
                 Value = result.Value;
+
         }
     }
 }

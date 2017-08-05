@@ -14,7 +14,7 @@ namespace NettleIO.Core
         }
 
         public StageWithInputCreator<TResult> AndDo<TResult>(
-            Expression<Func<TStage, Task<IValueResult<TResult>>>> stageExecutionExpression)
+            Expression<Func<TStage, Task<IStageValueResult<TResult>>>> stageExecutionExpression)
         {
             if (stageExecutionExpression == null) throw new ArgumentNullException(nameof(stageExecutionExpression));
 
@@ -36,7 +36,7 @@ namespace NettleIO.Core
         }
 
         public StageWithInputCreator<TResult> AndDo<TResult>(
-            Expression<Func<TStage, TInput, Task<IValueResult<TResult>>>> stageExecutionExpression)
+            Expression<Func<TStage, TInput, Task<IStageValueResult<TResult>>>> stageExecutionExpression)
         {
             if (stageExecutionExpression == null) throw new ArgumentNullException(nameof(stageExecutionExpression));
             var plan = new StageWithInputAndResultExecutionPlan<TStage, TInput, TResult>(stageExecutionExpression);
@@ -44,7 +44,7 @@ namespace NettleIO.Core
             return new StageWithInputCreator<TResult>(pipelineBuilder);
         }
 
-        public PipelineBuilder AndDo(Expression<Func<TStage, TInput, Task<IActionResult>>> stageExecutionExpression)
+        public PipelineBuilder AndDo(Expression<Func<TStage, TInput, Task<IStageResult>>> stageExecutionExpression)
         {
             if (stageExecutionExpression == null) throw new ArgumentNullException(nameof(stageExecutionExpression));
             var plan = new StageWithInputExecutionPlan<TStage, TInput>(stageExecutionExpression);

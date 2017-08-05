@@ -21,13 +21,13 @@ namespace NettleIO.Core
 
         public IPipeline AddSource<TSource, TDataOut>() where TSource : ISource<TDataOut>
         {
-            performers.Add(StagePerformer<TSource, TDataOut>.Build(stage => stage.RecieveAsync()));
+            performers.Add(StagePerformerBuilder.Build<TSource,TDataOut>(stage => stage.RecieveAsync()));
             return this;
         }
 
         public IPipeline AddStage<TStage, TDataIn, TDataOut>() where TStage : IStage<TDataIn, TDataOut>
         {
-            performers.Add(StagePerformer<TStage, TDataOut>.Build<TDataIn>((stage, input) => stage.Execute(input)));
+            performers.Add(StagePerformerBuilder.Build<TStage, TDataIn, TDataOut>((stage, input) => stage.Execute(input)));
             return this;
         }
 
@@ -38,15 +38,13 @@ namespace NettleIO.Core
 
         public IPipeline AddDestination<TDestination, TData>() where TDestination : IDestination<TData>
         {
-            performers.Add(StagePerformer<TDestination>.Build<TData>((stage, input) => stage.SendAsync(input)));
+            performers.Add(StagePerformerBuilder.Build<TDestination, TData>((stage, input) => stage.SendAsync(input)));
             return this;
         }
 
         public async Task<PipelineExecutionReport> Execute()
         {
-            Validate();
-
-            var results = new List<IActionResult>();
+            var results = new List<IStageResult>();
             object value = null;
             foreach (var performer in performers)
             {
@@ -63,16 +61,6 @@ namespace NettleIO.Core
             Console.WriteLine("Completed!");
 
             return new PipelineExecutionReport(results);
-        }
-
-        public void SetActivator(IActivator activator)
-        {
-            this.activator = activator ?? throw new ArgumentNullException(nameof(activator));
-        }
-
-        protected virtual void Validate()
-        {
-            Console.WriteLine("Doing some validation....?");
         }
 
         public void AddStage(IStagePerformer stagePerformer)

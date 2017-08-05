@@ -3,6 +3,5 @@
     internal interface IStageExecutionPlan
     {
         IStagePerformer BuildPerformer();
-
     }
 }

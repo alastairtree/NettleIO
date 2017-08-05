@@ -2,14 +2,8 @@ using System.Threading.Tasks;
 
 namespace NettleIO.Core
 {
-    public interface IDestination<in TData> : IDestination
+    public interface IDestination<in TData> 
     {
-        Task<IActionResult> SendAsync(TData item);
-    }
-
-    public interface IDestination
-    {
-        //TODO: try and remove the need for objects! can we use expressions lamdas and generics to make this more friendly?!
-        Task<IActionResult> SendAsync(object item);
+        Task<IStageResult> SendAsync(TData item);
     }
 }

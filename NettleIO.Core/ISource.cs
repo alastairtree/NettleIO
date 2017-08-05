@@ -4,6 +4,6 @@ namespace NettleIO.Core
 {
     public interface ISource<TResult>
     {
-        Task<IValueResult<TResult>> RecieveAsync();
+        Task<IStageValueResult<TResult>> RecieveAsync();
     }
 }

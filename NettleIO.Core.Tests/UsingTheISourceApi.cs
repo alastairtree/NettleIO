@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -8,7 +9,7 @@ namespace NettleIO.Core.Tests
     public class UsingTheISourceApi
     {
         [Fact]
-        public async Task DoStuff()
+        public async Task CompletePiplineTest()
         {
             IPipeline pipeline = new Pipeline(new Activator());
             pipeline
@@ -18,6 +19,10 @@ namespace NettleIO.Core.Tests
                 .AddDestination<MyDestination, AnotherEntity>();
 
             await pipeline.Execute();
+
+            Assert.Equal(1, MyDestination.Results.Count);
+            Assert.Equal("BLUNDERBUSS", MyDestination.Results.First().FullName);
+            Assert.Equal(1, MyDestination.Results.First().Id);
         }
 
         private class MyEntity
@@ -34,7 +39,7 @@ namespace NettleIO.Core.Tests
 
         private class MySource : Source<MyEntity>
         {
-            public override Task<IValueResult<MyEntity>> RecieveAsync()
+            public override Task<IStageValueResult<MyEntity>> RecieveAsync()
             {
                 Console.WriteLine("Created some data...");
                 return SuccessAsync(new MyEntity {Id = 1, Name = "Blunderbuss"});
@@ -43,7 +48,7 @@ namespace NettleIO.Core.Tests
 
         private class CapitaliseNameStage : Stage<MyEntity>
         {
-            public override async Task<IValueResult<MyEntity>> Execute(MyEntity input)
+            public override async Task<IStageValueResult<MyEntity>> Execute(MyEntity input)
             {
                 Console.WriteLine("Capitalising some thing");
                 await Task.Delay(100);
@@ -56,7 +61,7 @@ namespace NettleIO.Core.Tests
 
         private class MapToAnotherStage : Stage<MyEntity,AnotherEntity>
         {
-            public override async Task<IValueResult<AnotherEntity>> Execute(MyEntity input)
+            public override async Task<IStageValueResult<AnotherEntity>> Execute(MyEntity input)
             {
                 Console.WriteLine("Mapping to another!");
                 await Task.Delay(100);
@@ -69,11 +74,11 @@ namespace NettleIO.Core.Tests
 
         private class MyDestination : Destination<AnotherEntity>
         {
-            private readonly List<AnotherEntity> results = new List<AnotherEntity>();
+            internal static readonly List<AnotherEntity> Results = new List<AnotherEntity>();
 
-            public override async Task<IActionResult> SendAsync(AnotherEntity item)
+            public override async Task<IStageResult> SendAsync(AnotherEntity item)
             {
-                results.Add(item);
+                Results.Add(item);
                 Console.WriteLine($"Recieved item with ID {item.Id} and name {item.FullName}");
                 return await Result.SuccessAsync("woop");
             }

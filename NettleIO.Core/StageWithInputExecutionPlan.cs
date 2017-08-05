@@ -6,9 +6,9 @@ namespace NettleIO.Core
 {
     internal class StageWithInputExecutionPlan<TStage, TInput> : IStageExecutionPlan
     {
-        public Expression<Func<TStage, TInput, Task<IActionResult>>> ExecutionExpression { get; }
+        private Expression<Func<TStage, TInput, Task<IStageResult>>> ExecutionExpression { get; }
 
-        public StageWithInputExecutionPlan(Expression<Func<TStage, TInput, Task<IActionResult>>> stageExecutionExpression)
+        public StageWithInputExecutionPlan(Expression<Func<TStage, TInput, Task<IStageResult>>> stageExecutionExpression)
         {
             ExecutionExpression = stageExecutionExpression ??
                                        throw new ArgumentNullException(nameof(stageExecutionExpression));
@@ -16,7 +16,7 @@ namespace NettleIO.Core
 
         public IStagePerformer BuildPerformer()
         {
-            return StagePerformer<TStage>.Build(ExecutionExpression);
+            return StagePerformerBuilder.Build(ExecutionExpression);
         }
     }
 }

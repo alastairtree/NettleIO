@@ -8,7 +8,7 @@ namespace NettleIO.Core.Tests
     {
         private class IntroduceYourselfStage
         {
-            public async Task<IValueResult<string>> SayHi()
+            public async Task<IStageValueResult<string>> SayHi()
             {
                 return await Result.SuccessWithValueAsync("Hi Joe. Nice to see you.");
             }
@@ -16,7 +16,7 @@ namespace NettleIO.Core.Tests
 
         private class GentrifierStage
         {
-            public async Task<IValueResult<string>> FormaliseGreeting(string greeting)
+            public async Task<IStageValueResult<string>> FormaliseGreeting(string greeting)
             {
                 var formailsedGreeting = greeting.Replace("Hi", "Good day").Replace("Joe", "Mr Bloggs");
                 return await Result.SuccessWithValueAsync(formailsedGreeting);
@@ -27,7 +27,7 @@ namespace NettleIO.Core.Tests
         {
             public static string LastGreetingRecieved;
 
-            public async Task<IActionResult> Listen(string greeting)
+            public async Task<IStageResult> Listen(string greeting)
             {
                 LastGreetingRecieved = greeting;
                 Console.WriteLine($"Recieved: {greeting}");

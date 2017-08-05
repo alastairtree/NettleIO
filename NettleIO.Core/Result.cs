@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace NettleIO.Core
 {
-    public class Result<TValue> : Result, IValueResult<TValue>
+    public class Result<TValue> : Result, IStageValueResult<TValue>
     {
         internal Result()
         {
@@ -24,7 +24,7 @@ namespace NettleIO.Core
         public virtual TValue Value { get; }
     }
 
-    public class Result : IActionResult
+    public class Result : IStageResult
     {
         protected Result()
         {
@@ -43,70 +43,70 @@ namespace NettleIO.Core
         public virtual IActionMetric Metrics { get; protected set; }
         public virtual string Message { get; protected set; }
 
-        public static IActionResult Fail(string message = "")
+        public static IStageResult Fail(string message = "")
         {
             return new Result(message) {Succeeded = false};
         }
 
-        public static IValueResult<TValue> Fail<TValue>(string message = "")
+        public static IStageValueResult<TValue> Fail<TValue>(string message = "")
         {
             return new Result<TValue> { Message = message, Succeeded = false };
         }
 
-        public static Task<IActionResult> FailAsync(string message = "")
+        public static Task<IStageResult> FailAsync(string message = "")
         {
             return Task.FromResult(Fail(message));
         }
 
-        public static Task<IValueResult<TValue>> FailAsync<TValue>(string message = "")
+        public static Task<IStageValueResult<TValue>> FailAsync<TValue>(string message = "")
         {
             return Task.FromResult(Fail<TValue>(message));
         }
 
 
-        public static IActionResult Fail(Exception exception, string message = "")
+        public static IStageResult Fail(Exception exception, string message = "")
         {
             if (exception == null) throw new ArgumentNullException(nameof(exception));
 
             return new Result(message) {Succeeded = false, Error = exception};
         }
 
-        public static Task<IActionResult> FailAsync(Exception exception, string message = "")
+        public static Task<IStageResult> FailAsync(Exception exception, string message = "")
         {
             return Task.FromResult(Fail(exception, message));
         }
 
 
-        public static IValueResult<TValue> Fail<TValue>(Exception exception, string message = "")
+        public static IStageValueResult<TValue> Fail<TValue>(Exception exception, string message = "")
         {
             if (exception == null) throw new ArgumentNullException(nameof(exception));
 
             return new Result<TValue> { Succeeded = false, Error = exception, Message = message};
         }
 
-        public static Task<IValueResult<TValue>> FailAsync<TValue>(Exception exception, string message = "")
+        public static Task<IStageValueResult<TValue>> FailAsync<TValue>(Exception exception, string message = "")
         {
             return Task.FromResult(Fail<TValue>(exception, message));
         }
 
 
-        public static IValueResult<TValue> SuccessWithValue<TValue>(TValue value, string message = "")
+        public static IStageValueResult<TValue> SuccessWithValue<TValue>(TValue value, string message = "")
         {
             return new Result<TValue>(value) { Succeeded = true, Message = message };
         }
 
-        public static Task<IValueResult<TValue>> SuccessWithValueAsync<TValue>(TValue value, string message = "")
+        public static Task<IStageValueResult<TValue>> SuccessWithValueAsync<TValue>(TValue value, string message = "")
         {
             
             return Task.FromResult(SuccessWithValue(value, message));
         }
 
-        public static IActionResult Success(string message = "")
+        public static IStageResult Success(string message = "")
         {
             return new Result(message){ Succeeded=true };
         }
 
-        public static Task<IActionResult> SuccessAsync(string message = "")
+        public static Task<IStageResult> SuccessAsync(string message = "")
         {
             return Task.FromResult(Success(message));
         }

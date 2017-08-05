@@ -4,13 +4,12 @@ using System.Threading.Tasks;
 
 namespace NettleIO.Core
 {
-    //TODO: make this internal?
-    internal class StageWithInputAndResultExecutionPlan<TStage, TInput, TResult> : IStageExecutionPlan
+    internal class StageWithInputAndResultExecutionPlan<TStage, TStageInput, TResult> : IStageExecutionPlan
     {
-        public Expression<Func<TStage, TInput, Task<IValueResult<TResult>>>> ExecutionExpression { get; }
+        private Expression<Func<TStage, TStageInput, Task<IStageValueResult<TResult>>>> ExecutionExpression { get; }
 
         public StageWithInputAndResultExecutionPlan(
-            Expression<Func<TStage, TInput, Task<IValueResult<TResult>>>> stageExecutionExpression)
+            Expression<Func<TStage, TStageInput, Task<IStageValueResult<TResult>>>> stageExecutionExpression)
         {
             ExecutionExpression = stageExecutionExpression ??
                                        throw new ArgumentNullException(nameof(stageExecutionExpression));
@@ -18,7 +17,7 @@ namespace NettleIO.Core
 
         public IStagePerformer BuildPerformer()
         {
-            return StagePerformer<TStage, TResult>.Build(ExecutionExpression);
+            return StagePerformerBuilder.Build(ExecutionExpression);
         }
     }
 }
