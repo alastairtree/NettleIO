@@ -12,7 +12,7 @@ namespace NettleIO.Core
         IPipeline AddStage<TStage,TDataIn,TDataOut>() where TStage : IStage<TDataIn,TDataOut>;
 
         IPipeline AddStage<TStage, TData>() where TStage : IStage<TData>;
-        IPipeline RegisterDestination<TDestination, TData>() where TDestination : IDestination<TData>;
+        IPipeline AddDestination<TDestination, TData>() where TDestination : IDestination<TData>;
 
         Task<PipelineExecutionReport> Execute();
     }

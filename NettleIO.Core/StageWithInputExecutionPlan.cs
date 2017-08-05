@@ -10,7 +10,7 @@ namespace NettleIO.Core
 
         public StageWithInputExecutionPlan(Expression<Func<TStage, TInput, Task<IActionResult>>> stageExecutionExpression)
         {
-            this.ExecutionExpression = stageExecutionExpression ??
+            ExecutionExpression = stageExecutionExpression ??
                                        throw new ArgumentNullException(nameof(stageExecutionExpression));
         }
 

@@ -4,9 +4,9 @@ using Xunit;
 
 namespace NettleIO.Core.Tests
 {
-    public class FluentApiExamples
+    public class UsingTheFluentApiExamples
     {
-        class IntroduceYourselfStage
+        private class IntroduceYourselfStage
         {
             public async Task<IValueResult<string>> SayHi()
             {
@@ -14,7 +14,7 @@ namespace NettleIO.Core.Tests
             }
         }
 
-        class GentrifierStage
+        private class GentrifierStage
         {
             public async Task<IValueResult<string>> FormaliseGreeting(string greeting)
             {
@@ -23,7 +23,7 @@ namespace NettleIO.Core.Tests
             }
         }
 
-        class RecieveGreetingStage
+        private class RecieveGreetingStage
         {
             public static string LastGreetingRecieved;
 

@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 
 namespace NettleIO.Core
 {
-    class StagePerformer<TStage> : IStagePerformer
+    internal class StagePerformer<TStage> : IStagePerformer
     {
-        protected LambdaExpression stageExecutionExpression;
+        protected LambdaExpression StageExecutionExpression;
 
         public TStage StageInstance { get; private set; }
 
@@ -15,12 +15,10 @@ namespace NettleIO.Core
         {
             get
             {
-                var callExpression = stageExecutionExpression.Body as MethodCallExpression;
+                var callExpression = StageExecutionExpression.Body as MethodCallExpression;
                 if (callExpression == null)
-                {
                     throw new ArgumentException("Expression body should be of type `MethodCallExpression`",
-                        nameof(stageExecutionExpression));
-                }
+                        nameof(StageExecutionExpression));
                 return callExpression;
             }
         }
@@ -36,10 +34,8 @@ namespace NettleIO.Core
             {
                 StageInstance = activator.Create<TStage>();
                 if (StageInstance == null)
-                {
                     throw new InvalidOperationException(
                         $"activator returned NULL instance of the '{typeof(TStage)}' type.");
-                }
             }
         }
 
@@ -62,7 +58,7 @@ namespace NettleIO.Core
         {
             if (stageExecutionExpression == null) throw new ArgumentNullException(nameof(stageExecutionExpression));
 
-            return new StagePerformer<TStage> {stageExecutionExpression = stageExecutionExpression};
+            return new StagePerformer<TStage> {StageExecutionExpression = stageExecutionExpression};
         }
 
         public static StagePerformer<TStage> Build<TInput>(
@@ -70,18 +66,18 @@ namespace NettleIO.Core
         {
             if (stageExecutionExpression == null) throw new ArgumentNullException(nameof(stageExecutionExpression));
 
-            return new StagePerformer<TStage> {stageExecutionExpression = stageExecutionExpression};
+            return new StagePerformer<TStage> {StageExecutionExpression = stageExecutionExpression};
         }
     }
 
-    class StagePerformer<TStage, TResult> : StagePerformer<TStage>
+    internal class StagePerformer<TStage, TResult> : StagePerformer<TStage>
     {
         public static StagePerformer<TStage, TResult> Build(
             Expression<Func<TStage, Task<IValueResult<TResult>>>> stageExecutionExpression)
         {
             if (stageExecutionExpression == null) throw new ArgumentNullException(nameof(stageExecutionExpression));
 
-            return new StagePerformer<TStage, TResult> {stageExecutionExpression = stageExecutionExpression};
+            return new StagePerformer<TStage, TResult> {StageExecutionExpression = stageExecutionExpression};
         }
 
         public static StagePerformer<TStage, TResult> Build<TInput>(
@@ -89,7 +85,7 @@ namespace NettleIO.Core
         {
             if (stageExecutionExpression == null) throw new ArgumentNullException(nameof(stageExecutionExpression));
 
-            return new StagePerformer<TStage, TResult> {stageExecutionExpression = stageExecutionExpression};
+            return new StagePerformer<TStage, TResult> {StageExecutionExpression = stageExecutionExpression};
         }
 
         public override async Task Perform(params object[] arguments)
@@ -105,7 +101,7 @@ namespace NettleIO.Core
 
             Result = await task;
 
-            var result = (Result as IValueResult<TResult>);
+            var result = Result as IValueResult<TResult>;
             if (result != null)
                 Value = result.Value;
         }

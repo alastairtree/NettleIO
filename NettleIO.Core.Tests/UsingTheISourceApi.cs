@@ -5,7 +5,7 @@ using Xunit;
 
 namespace NettleIO.Core.Tests
 {
-    public class SampleUsage
+    public class UsingTheISourceApi
     {
         [Fact]
         public async Task DoStuff()
@@ -15,24 +15,24 @@ namespace NettleIO.Core.Tests
                 .AddSource<MySource,MyEntity>()
                 .AddStage<CapitaliseNameStage, MyEntity>()
                 .AddStage<MapToAnotherStage,MyEntity,AnotherEntity>()
-                .RegisterDestination<MyDestination, AnotherEntity>();
+                .AddDestination<MyDestination, AnotherEntity>();
 
             await pipeline.Execute();
         }
 
-        class MyEntity
+        private class MyEntity
         {
             public int Id { get; set; }
             public string Name { get; set; }
         }
 
-        class AnotherEntity
+        private class AnotherEntity
         {
             public int Id { get; set; }
             public string FullName { get; set; }
         }
 
-        class MySource : Source<MyEntity>
+        private class MySource : Source<MyEntity>
         {
             public override Task<IValueResult<MyEntity>> RecieveAsync()
             {
@@ -41,7 +41,7 @@ namespace NettleIO.Core.Tests
             }
         }
 
-        class CapitaliseNameStage : Stage<MyEntity>
+        private class CapitaliseNameStage : Stage<MyEntity>
         {
             public override async Task<IValueResult<MyEntity>> Execute(MyEntity input)
             {
@@ -54,7 +54,7 @@ namespace NettleIO.Core.Tests
             }
         }
 
-        class MapToAnotherStage : Stage<MyEntity,AnotherEntity>
+        private class MapToAnotherStage : Stage<MyEntity,AnotherEntity>
         {
             public override async Task<IValueResult<AnotherEntity>> Execute(MyEntity input)
             {
@@ -67,7 +67,7 @@ namespace NettleIO.Core.Tests
             }
         }
 
-        class MyDestination : Destination<AnotherEntity>
+        private class MyDestination : Destination<AnotherEntity>
         {
             private readonly List<AnotherEntity> results = new List<AnotherEntity>();
 

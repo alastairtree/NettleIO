@@ -38,7 +38,7 @@ namespace NettleIO.Core.Tests
             return Expression.Lambda<Func<T1, T3, T4>>(newSecond, param);
         }
 
-        class ReplaceVisitor : ExpressionVisitor
+        private class ReplaceVisitor : ExpressionVisitor
         {
             private readonly Expression from, to;
 

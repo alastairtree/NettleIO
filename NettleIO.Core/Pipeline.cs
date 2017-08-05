@@ -36,7 +36,7 @@ namespace NettleIO.Core
             return AddStage<TStage, TData, TData>();
         }
 
-        public IPipeline RegisterDestination<TDestination, TData>() where TDestination : IDestination<TData>
+        public IPipeline AddDestination<TDestination, TData>() where TDestination : IDestination<TData>
         {
             performers.Add(StagePerformer<TDestination>.Build<TData>((stage, input) => stage.SendAsync(input)));
             return this;
@@ -52,13 +52,9 @@ namespace NettleIO.Core
             {
                 performer.PrepareToPerform(activator);
                 if (value != null)
-                {
                     await performer.Perform(value);
-                }
                 else
-                {
                     await performer.Perform();
-                }
                 results.Add(performer
                     .Result); //TODO: We dont need all the result Value data, just the metadata. clone to another object?
                 value = performer.Value;

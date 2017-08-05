@@ -5,7 +5,7 @@ namespace NettleIO.Core
 {
     public class PipelineBuilder
     {
-        readonly List<IStageExecutionPlan> stagePlans = new List<IStageExecutionPlan>();
+        private readonly List<IStageExecutionPlan> stagePlans = new List<IStageExecutionPlan>();
 
         public static StageBuilder<T> StartWithSource<T>()
         {
@@ -39,9 +39,7 @@ namespace NettleIO.Core
         {
             var pipeline = new Pipeline();
             foreach (var stagePlan in stagePlans)
-            {
                 pipeline.AddStage(stagePlan.BuildPerformer());
-            }
             return pipeline;
         }
     }

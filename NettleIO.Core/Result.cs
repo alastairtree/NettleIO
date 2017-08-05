@@ -115,27 +115,17 @@ namespace NettleIO.Core
         {
             var str = string.Empty;
             if (Succeeded)
-            {
                 str += "Success";
-            }
             else if (Error == null)
-            {
                 str += "Failed";
-            }
             else
-            {
                 str += "Failed with an error";
-            }
 
             if (!string.IsNullOrEmpty(Message))
-            {
                 str += $": {Message}";
-            }
 
             if (Error != null)
-            {
                 str += $" ({Error.Message})";
-            }
 
             return str;
         }
