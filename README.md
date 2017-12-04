@@ -1,3 +1,7 @@
+
+Beware: This is nothing more than a proof of concept and is no way fit for use!
+
+
 # NettleIO
 
 NettleIO is an ETL and data integration framework for dot net.
